@@ -1,0 +1,19 @@
+#INSERT INTO products (name, price, quantity) VALUES ('Vela Aromática - Jasmim', 12.2, 5);
+
+CREATE DATABASE soli;
+SHOW DATABASES;
+
+DROP TABLE products;
+CREATE TABLE products (
+	id MEDIUMINT NOT NULL AUTO_INCREMENT,
+    name TEXT NOT NULL,
+    price FLOAT,
+	quantity INTEGER,
+    PRIMARY KEY (id)
+);
+
+
+SELECT * FROM products;
+SELECT * FROM products WHERE id = 3;
+
+DELETE FROM products WHERE id = 4; 
