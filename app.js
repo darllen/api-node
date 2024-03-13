@@ -25,16 +25,16 @@ connection.connect((err) => {
 
 let operations = {
     create: function(email,senha) {
-      return connection.promise().query('insert into usuarios (email, senha) VALUES (?,?)', [email, senha])
+      return connection.promise().query('insert into usuario (email, senha) VALUES (?,?)', [email, senha])
     },
     read: function(){
-      return connection.promise().query('select * from usuarios for update')
+      return connection.promise().query('select * from usuario for update')
     },
     update: function(email, senha, id){
-        return connection.promise().execute('update usuarios set email = ?, senha = ? where id = ?', [email, senha, id])
+        return connection.promise().execute('update usuario set email = ?, senha = ? where id = ?', [email, senha, id])
     },
     delete: function(id){
-      return connection.promise().execute('delete from usuarios where id = ?', [id] )
+      return connection.promise().execute('delete from usuario where id = ?', [id] )
     },
 }
 
