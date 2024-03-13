@@ -1,25 +1,19 @@
 {
-  "name": "backend",
+  "name": "web3-expresscommysql",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js",
-    "status": "node src/index.js"
+    "dev": "nodemon app.js"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.0.3",
+    "body-parser": "^1.20.2",
     "express": "^4.18.2",
-    "ip": "^1.1.8",
-    "mysql2": "^3.1.0",
-    "sequelize": "^6.28.0"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0"
+    "mysql": "^2.18.1",
+    "mysql2": "^3.9.2",
+    "nodemon": "^3.1.0"
   }
 }
