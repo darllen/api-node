@@ -39,7 +39,7 @@ let operationsCliente = {
   findById: function (id) {
     return connection
       .promise()
-      .query("select * from clientes where id = ?", [id]);
+      .query("select * from clientes where id = ? limit 1", [id]);
   },
   update: function (id, nome, email, endereco, telefone) {
     return connection
@@ -411,6 +411,125 @@ app.delete("/api/produto/:id", async (req, res) => {
 });
 
 // fim crud de produto
+
+// crud de pedido
+let operationsPedido = {
+  create: function (idCliente, data, status) {
+    return connection
+      .promise()
+      .query(
+        "insert into pedidos (id_cliente, data_pedido, status) VALUES (?,?,?)",
+        [idCliente, data, status]
+      );
+  },
+  find: function () {
+    return connection.promise().query("select * from pedidos for update");
+  },
+  findById: function (id) {
+    return connection
+      .promise()
+      .query("select * from pedidos where id = ? limit 1", [id]);
+  },
+  update: function (id, idCliente, data, status) {
+    return connection
+      .promise()
+      .execute(
+        "update pedidos set id_cliente = ?, data_pedido = ?, status = ? where id = ?",
+        [id, idCliente, data, status]
+      );
+  },
+  delete: function (id) {
+    return connection
+      .promise()
+      .execute("delete from pedidos where id = ?", [id]);
+  },
+};
+
+app.get("/api/pedido/", async (req, res) => {
+  operationsPedido
+    .find()
+    .then((result) => {
+      res.status(200).json(result[0]);
+    })
+    .catch((err) => {
+      console.log(err, "Erro coletando os pedidos");
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.get("/api/pedido/:id", async (req, res) => {
+  const pedidoId = req.params.id;
+  operationsPedido
+    .findById(pedidoId)
+    .then((result) => {
+      let pedido = JSON.stringify(result[0]);
+      pedido = pedido.replace("[", "");
+      pedido = pedido.replace("]", "");
+
+      res.status(200).json(JSON.parse(pedido));
+    })
+    .catch((err) => {
+      console.log(err, "Pedido não encontrado");
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.post("/api/pedido/", async (req, res) => {
+  const { idCliente, data, status } = req.body;
+
+  operationsCliente
+    .findById(idCliente)
+    .then((result) => {
+      operationsPedido
+        .create(idCliente, data, status)
+        .then(() => {
+          console.log("Pedido criado com sucesso");
+          res.status(200).json({ message: "Sucesso" });
+        })
+        .catch((err) => {
+          console.log(err, "Erro ao criar pedido");
+          res.status(500).json({ message: "Erro ao criar pedido" });
+        });
+    })
+    .catch((err) => {
+      console.log(err, "Erro ao verificar cliente");
+      res.status(500).json({ message: "Erro ao verificar cliente" });
+    });
+});
+
+
+app.put("/api/pedido/:id", async (req, res) => {
+  const pedidoId = req.params.id;
+  const { idCliente, data, status } = req.body;
+
+  operationsPedido
+    .update(idCliente, data, status, pedidoId)
+    .then((result) => {
+      console.log("Pedido atualizado com sucesso");
+      res.status(200).json({ message: "Sucesso" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.delete("/api/pedido/:id", async (req, res) => {
+  const pedidoId = req.params.id;
+
+  operationsPedido.delete(pedidoId).then((result) => {
+    if (result[0].affectedRows > 0) {
+      res.status(200).json({ message: "Sucesso" });
+      console.log("Pedido deleteado");
+    } else {
+      res.status(404).json({ message: "Erro" });
+      console.log("Registro não encontrado");
+    }
+  });
+});
+
+// fim crud de cliente
+
 
 app.listen(port, () => {
   console.log(`Server started in http://localhost:${port}`);
