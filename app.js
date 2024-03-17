@@ -9,8 +9,8 @@ app.use(express.json());
 
 const connection = mysql.createConnection({
   host: "localhost",
-  user: "aluno",
-  password: "ifpecjbg",
+  user: "root", //aluno
+  password: "1234", //ifpecjbg
   database: "aula4",
   port: 3306,
 });
@@ -145,7 +145,7 @@ let operationsCategoria = {
   findById: function (id) {
     return connection
       .promise()
-      .query("select * from categorias where id = ?", [id]);
+      .query("select * from categorias where id = ? limit 1", [id]);
   },
   findByName: function (name) {
     return connection
@@ -170,21 +170,21 @@ let operationsCategoria = {
 
 
 app.get("/api/categoria/byname/", async (req, res) => {
-    const categoriaName = req.body.nome;
-    operationsCategoria
-      .findByName(categoriaName)
-      .then((result) => {
-        let categoria = JSON.stringify(result[0]);
-        categoria = categoria.replace("[", "");
-        categoria = categoria.replace("]", "");
-  
-        res.status(200).json(JSON.parse(categoria));
-      })
-      .catch((err) => {
-        console.log(err, "Categoria não encontrada");
-        res.status(500).json({ message: "Erro" });
-      });
-  });
+  const categoriaName = req.body.nome;
+  operationsCategoria
+    .findByName(categoriaName)
+    .then((result) => {
+      let categoria = JSON.stringify(result[0]);
+      categoria = categoria.replace("[", "");
+      categoria = categoria.replace("]", "");
+
+      res.status(200).json(JSON.parse(categoria));
+    })
+    .catch((err) => {
+      console.log(err, "Categoria não encontrada");
+      res.status(500).json({ message: "Erro" });
+    });
+});
 
 app.get("/api/categoria/", async (req, res) => {
   operationsCategoria
@@ -214,7 +214,6 @@ app.get("/api/categoria/:id", async (req, res) => {
       res.status(500).json({ message: "Erro" });
     });
 });
-
 
 
 app.post("/api/categoria", async (req, res) => {
@@ -262,45 +261,154 @@ app.delete("/api/categoria/:id", async (req, res) => {
     }
   });
 });
-
 // fim crud de categoria
 
 // crud de produto
 let operationsProduto = {
-    create: function (nome, descricao, preco, idCategoria) {
-        if (operationsCategoria.findById(idCategoria)){
-            return connection
-                .promise()
-                .query("insert into produtos (nome, descricao, preco, id_categoria) VALUES (?,?,?,?)", [
-                nome,
-                descricao,
-                preco,
-                idCategoria
-                ]);
-        } else {
-            throw new Error("Categoria não encontrada");
-        }
+    create: function (nome, descricao, preco, idCategoria, disponivel) {
+      return connection
+        .promise()
+        .query("insert into produtos (nome, descricao, preco, id_categoria, disponivel) VALUES (?,?,?,?,?)", [
+          nome,
+          descricao,
+          preco,
+          idCategoria,
+          disponivel
+        ]);
+    },
+    find: function () {
+      return connection.promise().query("select * from produtos for update");
+    },
+    findById: function (id) {
+      return connection
+        .promise()
+        .query("select * from produtos where id = ? limit 1", [id]);
+    },
+    findByName: function (name) {
+      return connection
+        .promise()
+        .query("select * from produtos where nome = ?", [name]);
+    },
+    update: function (id, nome, descricao, preco, idCategoria, disponivel) {
+      return connection
+        .promise()
+        .execute("update produtos set nome = ?, descricao = ?, preco = ?, id_categoria = ?, disponivel = ? where id = ?", [
+          id,
+          nome,
+          descricao,
+          preco,
+          idCategoria,
+          disponivel
+        ]);
+    },
+    delete: function (id) {
+      return connection
+        .promise()
+        .execute("delete from produtos where id = ?", [id]);
     },
     
   };
   
+app.post("/api/produto", async (req, res) => {
+  const { nome, descricao, preco, idCategoria, disponivel } = req.body;
+
+  operationsCategoria
+    .findById(idCategoria)
+    .then(() => {
+      operationsProduto
+        .create(nome, descricao, preco, idCategoria, disponivel)
+        .then(() => {
+          console.log("Produto inserido com sucesso");
+          res.status(200).json({ message: "Sucesso" });
+        })
+        .catch((err) => {
+          console.log(err, "Erro ao inserir produto, verifique a categoria");
+          res.status(500).json({ message: "Erro ao inserir produto, verifique a categoria" });
+        });
+    })
+    .catch((err) => {
+      console.log(err, "Erro ao verificar categoria");
+      res.status(500).json({ message: "Erro ao verificar categoria" });
+    });
+});
   
-  app.post("/api/produto", async (req, res) => {
-    const { nome, descricao, preco, idCategoria } = req.body;
-  
-    operationsProduto
-      .create(nome, descricao, preco, idCategoria)
-      .then((result) => {
-        console.log("Produto inserido com sucesso");
-        res.status(200).json({ message: "Sucesso" });
-      })
-      .catch((err) => {
-        console.log(err, "Erro ao inserir produto");
-        res.status(500).json({ message: "Erro" });
-      });
+app.get("/api/produto/byname/", async (req, res) => {
+  const produtoNome = req.body.nome;
+  operationsProduto
+    .findByName(produtoNome)
+    .then((result) => {
+      let produto = JSON.stringify(result[0]);
+      produto = produto.replace("[", "");
+      produto = produto.replace("]", "");
+
+      res.status(200).json(JSON.parse(produto));
+    })
+    .catch((err) => {
+      console.log(err, "Produto não encontrado");
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.get("/api/produto/", async (req, res) => {
+  operationsProduto
+  .find()
+  .then((result) => {
+    res.status(200).json(result[0]);
+  })
+  .catch((err) => {
+    console.log(err, "Erro coletando os produtos");
+    res.status(500).json({ message: "Erro" });
   });
-  
- 
+});
+
+app.get("/api/produto/:id", async (req, res) => {
+const produtoId = req.params.id;
+operationsProduto
+  .findById(produtoId)
+  .then((result) => {
+    let produto = JSON.stringify(result[0]);
+    produto = produto.replace("[", "");
+    produto = produto.replace("]", "");
+
+    res.status(200).json(JSON.parse(produto));
+  })
+  .catch((err) => {
+    console.log(err, "Produto não encontrada");
+    res.status(500).json({ message: "Erro" });
+  });
+});
+
+app.put("/api/produto/:id", async (req, res) => {
+  const produtoId = req.params.id;
+  const { nome, descricao, preco, idCategoria, disponivel } = req.body;
+
+  operationsProduto
+    .update(nome, descricao, preco, idCategoria, disponivel, produtoId)
+    .then((result) => {
+      console.log("Produto atualizado com sucesso");
+      res.status(200).json({ message: "Sucesso" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.delete("/api/produto/:id", async (req, res) => {
+  const produtoId = req.params.id;
+
+  operationsProduto
+  .delete(produtoId)
+  .then((result) => {
+    if (result[0].affectedRows > 0) {
+      res.status(200).json({ message: "Sucesso" });
+      console.log("Produto deleteado");
+    } else {
+      res.status(404).json({ message: "Erro" });
+      console.log("Registro não encontrado");
+    }
+  });
+});
 
 // fim crud de produto
 
