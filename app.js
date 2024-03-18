@@ -528,8 +528,116 @@ app.delete("/api/pedido/:id", async (req, res) => {
   });
 });
 
-// fim crud de cliente
+// fim crud de pedido
 
+// crud de itensPedido
+let operationsItensPedido = {
+  create: function (idPedido, idProduto, quantidade, preco) {
+    return connection
+      .promise()
+      .query(
+        "insert into itenspedido (id_pedido, id_produto, quantidade, preco_unitario) VALUES (?,?,?,?)",
+        [idPedido, idProduto, quantidade, preco]
+      );
+  },
+  find: function () {
+    return connection.promise().query("select * from itenspedido for update");
+  },
+  update: function (id, idPedido, idProduto, quantidade, preco) {
+    return connection
+      .promise()
+      .execute(
+        "update itenspedido set id_pedido = ?, id_produto = ?, quantidade = ?, preco_unitario = ? where id = ?",
+        [id, idPedido, idProduto, quantidade, preco]
+      );
+  },
+  delete: function (id) {
+    return connection
+      .promise()
+      .execute("delete from itenspedido where id = ?", [id]);
+  },
+};
+
+app.get("/api/itempedido/", async (req, res) => {
+  operationsItensPedido
+    .find()
+    .then((result) => {
+      res.status(200).json(result[0]);
+    })
+    .catch((err) => {
+      console.log(err, "Erro coletando os itens do pedido");
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+
+app.post("/api/itempedido/", async (req, res) => {
+  const { idPedido, idProduto, quantidade, preco } = req.body;
+
+  operationsPedido
+    .findById(idPedido)
+    .then((pedido) => {
+      if (pedido[0].length === 0) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      operationsProduto
+        .findById(idProduto)
+        .then((produto) => {
+          if (produto[0].length === 0) {
+            return res.status(404).json({ message: "Produto não encontrado" });
+          }
+           operationsItensPedido.create(idPedido, idProduto, quantidade, preco)
+              .then(() => {
+                console.log("Item de pedido cadastrado com sucesso");
+                res.status(200).json({ message: "Sucesso" });
+              })
+              .catch((err) => {
+                console.log(err, "Erro ao cadastrar item de pedido");
+                res.status(500).json({ message: "Erro ao cadastrar item de pedido" });
+              });
+        })
+        .catch((err) => {
+          console.log(err, "Erro ao verificar produto");
+          res.status(500).json({ message: "Erro ao verificar produto" });
+        });
+    })
+    .catch((err) => {
+      console.log(err, "Erro ao verificar pedido");
+      res.status(500).json({ message: "Erro ao verificar pedido" });
+    });
+});
+
+app.put("/api/itempedido/:id", async (req, res) => {
+  const itempedidoId = req.params.id;
+  const { idPedido, idProduto, quantidade, preco  } = req.body;
+
+  operationsItensPedido
+    .update(idPedido, idProduto, quantidade, preco , itempedidoId)
+    .then((result) => {
+      console.log("Item atualizado com sucesso");
+      res.status(200).json({ message: "Sucesso" });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ message: "Erro" });
+    });
+});
+
+app.delete("/api/itempedido/:id", async (req, res) => {
+  const itempedidoId = req.params.id;
+
+  operationsItensPedido
+    .delete(itempedidoId)
+    .then((result) => {
+      if (result[0].affectedRows > 0) {
+        res.status(200).json({ message: "Sucesso" });
+        console.log("Item deleteado");
+      } else {
+        res.status(404).json({ message: "Erro" });
+        console.log("Registro não encontrado");
+      }
+    });
+});
 
 app.listen(port, () => {
   console.log(`Server started in http://localhost:${port}`);
