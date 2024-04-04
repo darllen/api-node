@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
-const sequelize = require("../../db");
+const sequelize = require("../database/database");
+
 
 
 sequelize
@@ -11,29 +12,26 @@ sequelize
         console.log('Erro ao conectar: ' + erro);
     });
     
-const Perguntas = sequelize.define('Perguntas', {
-    descricao: {
-        type: Sequelize.TEXT,
+const Disciplina = sequelize.define('Disciplinas', {
+    nome: {
+        type: Sequelize.STRING(45),
         allowNull: false,
+        unique: true
     },
-    usuario_id: {
+     periodo: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+    },
+     curso_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-            model: 'Usuarios',
-            key: 'id'
-        }
-    },
-    disciplina_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-        model: 'Disciplinas',
+        model: 'Cursos',
         key: 'id'
-        }
+    }
     }
 });
 
 
     
-module.exports = Perguntas;
+module.exports = Disciplina;

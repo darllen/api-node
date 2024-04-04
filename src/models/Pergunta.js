@@ -1,5 +1,8 @@
 const Sequelize = require("sequelize");
-const sequelize = require("../../db")
+const sequelize = require("../database/database");
+
+
+
 sequelize
     .authenticate()
     .then(function() {
@@ -9,27 +12,29 @@ sequelize
         console.log('Erro ao conectar: ' + erro);
     });
     
-const Comentarios = sequelize.define('Comentarios', {
-    id_usuario: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references:  { model: 'Usuarios', 
-        key: 'id'
-        }
-    },
+const Pergunta = sequelize.define('Perguntas', {
     descricao: {
         type: Sequelize.TEXT,
-        allowNull: false
+        allowNull: false,
     },
-    id_resposta: {
+    usuario_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-            model: 'Respostas',
+            model: 'Usuarios',
             key: 'id'
+        }
+    },
+    disciplina_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+        model: 'Disciplinas',
+        key: 'id'
         }
     }
 });
 
+
     
-module.exports = Comentarios;
+module.exports = Pergunta;

@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const sequelize = require("../../db");
+const sequelize = require("../database/database");
 
 
 sequelize
@@ -11,7 +11,7 @@ sequelize
         console.log('Erro ao conectar: ' + erro);
     });
 
-const Usuarios = sequelize.define('Usuarios', {
+const Usuario = sequelize.define('Usuarios', {
     nome: {
         type: Sequelize.STRING(80),
         allowNull: false
@@ -32,4 +32,4 @@ const Usuarios = sequelize.define('Usuarios', {
     }
 });
 
-module.exports = Usuarios;
+module.exports = Usuario;
