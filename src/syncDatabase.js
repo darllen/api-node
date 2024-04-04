@@ -1,9 +1,9 @@
-const Curso = require('./src/models/Curso');
-const Usuario = require('./src/models/Usuario');
-const Disciplina = require('./src/models/Disciplina');
-const Pergunta = require('./src/models/Pergunta');
-const Resposta = require('./src/models/Resposta');
-const Comentario = require('./src/models/Comentario');
+const Curso = require('./models/Curso');
+const Usuario = require('./models/Usuario');
+const Disciplina = require('./models/Disciplina');
+const Pergunta = require('./models/Pergunta');
+const Resposta = require('./models/Resposta');
+const Comentario = require('./models/Comentario');
 
 function syncDatabase() {
     return Promise.all([

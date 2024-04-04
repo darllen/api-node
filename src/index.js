@@ -14,7 +14,7 @@ const ip_adress = ip.address();
 const porta = process.env.PORT || 3030;
 
 
-const syncDatabase = require("./syncDatabase.js");
+const syncDatabase = require("./syncDatabase");
 syncDatabase().then(()=>{
     console.log("Tabelas criadas")
 }).catch((err)=> {
@@ -22,7 +22,7 @@ syncDatabase().then(()=>{
 })
 
 // Conectar com o banco
-const routes = require("./src/routes/routes.js")
+const routes = require("./routes/routes.js")
 app.use(routes)
 
 
